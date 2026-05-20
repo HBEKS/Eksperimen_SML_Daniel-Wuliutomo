@@ -1,0 +1,41 @@
+name: Auto Preprocessing
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  preprocess:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas numpy scikit-learn
+    
+    - name: Run preprocessing script
+      run: |
+        python preprocessing/automate_Daniel.py --input dataset/loan_data.csv --output preprocessing/loan_preprocessing
+    
+    - name: List output files
+      run: |
+        echo "=== Hasil Preprocessing ==="
+        ls -la preprocessing/loan_preprocessing/ || echo "Folder belum ada"
+    
+    - name: Upload preprocessed dataset
+      uses: actions/upload-artifact@v4
+      with:
+        name: preprocessed-dataset
+        path: preprocessing/loan_preprocessing/loan_processed.csv
